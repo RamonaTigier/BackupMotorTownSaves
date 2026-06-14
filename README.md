@@ -57,7 +57,7 @@ All paths are generated dynamically using `$env:LOCALAPPDATA`.
 Run the script in PowerShell:
 
 ```powershell
-.\MotorTownSaveManager.ps1
+.\BackupMotorTownSaves.ps1
 ```
 
 
@@ -104,8 +104,9 @@ Alle Pfade werden dynamisch über $env:LOCALAPPDATA erzeugt.
 🚀 Verwendung
 Starte das Skript einfach in PowerShell:
 
-powershell
-.\MotorTownSaveManager.ps1
+```powershell
+.\BackupMotorTownSaves.ps1
+```
 
 ---
 
