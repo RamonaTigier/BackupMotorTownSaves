@@ -55,7 +55,7 @@
 
 # Manual version definition
 $Major = 1
-$Minor = 4
+$Minor = 5
 $Patch = 0
 $Build = 14
 $Tag = "stable"
