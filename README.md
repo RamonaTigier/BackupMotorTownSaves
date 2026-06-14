@@ -1,5 +1,5 @@
 # BackupMotorTownSaves
-GERMAN Version below.
+GERMAN version below.
 
 # MotorTown SaveGame Manager 🚗💾
 
@@ -36,6 +36,7 @@ outdated backups, and supports multi‑target backup operations.
 ---
 
 ## 📂 Folder Structure
+
 %LOCALAPPDATA%\MotorTown\Saved\SaveGames\
 
 ├── Characters
@@ -45,6 +46,7 @@ outdated backups, and supports multi‑target backup operations.
 ├── Characters - Test
 
 └── Characters - Prod
+
 
 All paths are generated dynamically using `$env:LOCALAPPDATA`.
 
@@ -56,53 +58,66 @@ Run the script in PowerShell:
 
 ```powershell
 .\MotorTownSaveManager.ps1
+```
 
 
+MotorTown SaveGame Manager 🚗💾
+https://img.shields.io/badge/Status-Active-brightgreen
+https://img.shields.io/badge/PowerShell-7%2B-blue
+https://img.shields.io/badge/License-MIT-yellow
+https://img.shields.io/badge/Version-1.4.0-orange
 
-# MotorTown SaveGame Manager 🚗💾
-
-![Status](https://img.shields.io/badge/Status-Active-brightgreen)
-![PowerShell](https://img.shields.io/badge/PowerShell-7%2B-blue)
-![License](https://img.shields.io/badge/License-MIT-yellow)
-![Version](https://img.shields.io/badge/Version-1.4.0-orange)
-
-Ein leistungsstarkes, farbcodiertes PowerShell‑Tool zur Verwaltung von MotorTown‑Savegames.  
-Erstellt Backups, stellt Spielstände wieder her, sortiert nach Datum, warnt vor alten Backups  
+Ein leistungsstarkes, farbcodiertes PowerShell‑Tool zur Verwaltung von MotorTown‑Savegames.
+Erstellt Backups, stellt Spielstände wieder her, sortiert nach Datum, warnt vor alten Backups
 und unterstützt Multi‑Backup‑Operationen.
 
----
+✨ Features
+🔄 Backup des Characters‑Ordners nach:
+Backup
+Test
+Prod
 
-## ✨ Features
+♻️ Restore aus allen drei Zielordnern
+🧹 Automatisches Leeren des Zielordners vor dem Kopieren
+🔢 Dateizählung (Source & Target)
+🕒 Zeitstempel im Format yyyyMMdd HH:mm:ss
+📅 Sortierung nach Datum (neueste zuerst)
+🎨 Farbcodierung nach Alter:
 
-- 🔄 **Backup** des `Characters`‑Ordners nach:
-  - `Backup`
-  - `Test`
-  - `Prod`
-- ♻️ **Restore** aus allen drei Zielordnern
-- 🧹 **Automatisches Leeren** des Zielordners vor dem Kopieren
-- 🔢 **Dateizählung** (Source & Target)
-- 🕒 **Zeitstempel** im Format `yyyyMMdd HH:mm:ss`
-- 📅 **Sortierung nach Datum (neueste zuerst)**
-- 🎨 **Farbcodierung nach Alter:**
-  - **Grün** < 7 Tage  
-  - **Gelb** 7–29 Tage  
-  - **Rot** ≥ 30 Tage  
-  - **Grau** = kein Backup vorhanden
-- 📦 **Multi‑Backup** (Characters → Backup, Test, Prod)
-- 📝 **Statusdatei** zur Nachverfolgung aller Backups
+Grün < 7 Tage
+Gelb 7–29 Tage
+Rot ≥ 30 Tage
+Grau = kein Backup vorhanden
 
----
+📦 Multi‑Backup (Characters → Backup, Test, Prod)
+📝 Statusdatei zur Nachverfolgung aller Backups
 
-## 📂 Ordnerstruktur
+📂 Ordnerstruktur
 
-Alle Pfade werden **dynamisch** über `$env:LOCALAPPDATA` erzeugt.
+%LOCALAPPDATA%\MotorTown\Saved\SaveGames\
 
----
+ ├── Characters
+ 
+ ├── Characters - Backup
+ 
+ ├── Characters - Test
+ 
+ └── Characters - Prod
+Alle Pfade werden dynamisch über $env:LOCALAPPDATA erzeugt.
 
-## 🚀 Verwendung
-
+🚀 Verwendung
 Starte das Skript einfach in PowerShell:
 
-```powershell
+powershell
 .\MotorTownSaveManager.ps1
 
+---
+
+Wenn du möchtest, kann ich dir zusätzlich:
+
+- eine **LICENSE** Datei generieren  
+- ein **CHANGELOG.md** erstellen  
+- ein **GitHub Release Template** bauen  
+- oder ein **Projekt‑Logo** designen  
+
+Sag einfach Bescheid.
