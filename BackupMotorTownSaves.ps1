@@ -85,12 +85,6 @@ $Header = @"
 
         B a c k u p M o t o r T o w n S a v e s
 Version: $ReleaseTag
-
------------------------------------------
-Backup/restore manager for MotorTown saves.
-Includes multi-backup, sorted restore list,
-timestamp tracking and dynamic header.
------------------------------------------
 "@
 
 Write-Host $Header
@@ -325,13 +319,11 @@ function Show-Menu {
     # Sort newest first
     $sorted = $dates | Sort-Object Parsed -Descending
 
-    Write-Host "==============================="
-    Write-Host " MotorTown SaveGame Manager"
-    Write-Host "==============================="
+    Write-Host "--------------------------------------------------------------"
     Write-Host "1) Characters -> Backup"
     Write-Host "2) Characters -> Test"
     Write-Host "3) Characters -> Prod"
-    Write-Host "-------------------------------"
+    Write-Host "--------------------------------------------------------------"
 
     foreach ($entry in $sorted) {
 
@@ -366,11 +358,11 @@ function Show-Menu {
         }
     }
 
-    Write-Host "-------------------------------"
+    Write-Host "--------------------------------------------------------------"
     Write-Host "8) Characters -> ALL (Backup, Test, Prod)"
-    Write-Host "-------------------------------"
+    Write-Host "--------------------------------------------------------------"
     Write-Host "0) Exit"
-    Write-Host "==============================="
+    Write-Host "--------------------------------------------------------------"
 }
 
 # Main loop
