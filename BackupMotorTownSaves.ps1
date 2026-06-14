@@ -24,9 +24,10 @@
    - File count display for source and target
 
  Version:
-   1.4.0
+   1.5.0
 
  Changelog:
+   1.5.0 - Added World-folder integration
    1.4.0 - Added color-coded backup age (green/yellow/red)
            Added correct date sorting (newest first)
            Added file count display in copy dialog
@@ -97,14 +98,23 @@ $Backup     = Join-Path $BasePath "Characters - Backup"
 $Test       = Join-Path $BasePath "Characters - Test"
 $Prod       = Join-Path $BasePath "Characters - Prod"
 
+$Worlds       = Join-Path $BasePath "Worlds"
+$WorldsBackup = Join-Path $BasePath "Worlds - Backup"
+$WorldsTest   = Join-Path $BasePath "Worlds - Test"
+$WorldsProd   = Join-Path $BasePath "Worlds - Prod"
+
+
 # Status file
 $StatusFile = ".\CharactersBackupStatus.txt"
 
 # Create status file if missing
 if (-not (Test-Path $StatusFile)) {
-    Set-Content $StatusFile "Backup="
-    Add-Content $StatusFile "Test="
-    Add-Content $StatusFile "Prod="
+    Set-Content $StatusFile "CharactersBackup="
+    Add-Content $StatusFile "CharactersTest="
+    Add-Content $StatusFile "CharactersProd="
+    Add-Content $StatusFile "WorldsBackup="
+    Add-Content $StatusFile "WorldsTest="
+    Add-Content $StatusFile "WorldsProd="
 }
 
 # Read status
@@ -271,124 +281,88 @@ function Copy-FolderContent {
 }
 
 # Menu
-function Show-Menu {
+function Manage-SaveType {
+    param(
+        [string]$Type,
+        [string]$Source,
+        [string]$Backup,
+        [string]$Test,
+        [string]$Prod
+    )
 
-    function Format-DateHuman {
-        param([string]$raw)
+    do {
+        Write-Host "--------------------------------------------------------------"
+        Write-Host "$Type SaveGame Manager"
+        Write-Host "--------------------------------------------------------------"
+        Write-Host "1) $Type -> Backup"
+        Write-Host "2) $Type -> Test"
+        Write-Host "3) $Type -> Prod"
+        Write-Host "--------------------------------------------------------------"
+        Write-Host "4) Backup -> $Type"
+        Write-Host "5) Test   -> $Type"
+        Write-Host "6) Prod   -> $Type"
+        Write-Host "--------------------------------------------------------------"
+        Write-Host "8) $Type -> ALL (Backup, Test, Prod)"
+        Write-Host "--------------------------------------------------------------"
+        Write-Host "0) Back"
+        Write-Host "--------------------------------------------------------------"
 
-        if ($raw -eq "" -or $raw -eq $null) { return "none" }
+        $choice = Read-Host "Select"
 
-        # raw format: yyyyMMdd HH:mm:ss
-        $parts = $raw.Split(" ")
-        $date = $parts[0]
-        $time = $parts[1]
+        switch ($choice) {
+            "1" { Copy-FolderContent -Source $Source -Target $Backup -StatusKey "${Type}Backup" }
+            "2" { Copy-FolderContent -Source $Source -Target $Test   -StatusKey "${Type}Test" }
+            "3" { Copy-FolderContent -Source $Source -Target $Prod   -StatusKey "${Type}Prod" }
 
-        $year  = $date.Substring(0,4)
-        $month = $date.Substring(4,2)
-        $day   = $date.Substring(6,2)
+            "4" { Copy-FolderContent -Source $Backup -Target $Source -StatusKey "${Type}Backup" }
+            "5" { Copy-FolderContent -Source $Test   -Target $Source -StatusKey "${Type}Test" }
+            "6" { Copy-FolderContent -Source $Prod   -Target $Source -StatusKey "${Type}Prod" }
 
-        return "$day.$month.$year $time"
-    }
-
-    # Build proper objects with parsed DateTime
-    $dates = @()
-
-    foreach ($key in @("Backup","Test","Prod")) {
-        $raw = Get-Status -Key $key
-
-        if ($raw -and $raw -ne "") {
-            try {
-                $parsed = [datetime]::ParseExact($raw, "yyyyMMdd HH:mm:ss", $null)
+            "8" {
+                Copy-FolderContent -Source $Source -Target $Backup -StatusKey "${Type}Backup"
+                Copy-FolderContent -Source $Source -Target $Test   -StatusKey "${Type}Test"
+                Copy-FolderContent -Source $Source -Target $Prod   -StatusKey "${Type}Prod"
             }
-            catch {
-                $parsed = Get-Date "1900-01-01"
-            }
-        }
-        else {
-            $parsed = Get-Date "1900-01-01"
-            $raw = ""
+
+            "0" { return }
+            default { Write-Host "Invalid input." }
         }
 
-        $dates += [pscustomobject]@{
-            Key    = $key
-            Raw    = $raw
-            Parsed = $parsed
-        }
-    }
-
-    # Sort newest first
-    $sorted = $dates | Sort-Object Parsed -Descending
-
-    Write-Host "--------------------------------------------------------------"
-    Write-Host "1) Characters -> Backup"
-    Write-Host "2) Characters -> Test"
-    Write-Host "3) Characters -> Prod"
-    Write-Host "--------------------------------------------------------------"
-
-    foreach ($entry in $sorted) {
-
-        $human = Format-DateHuman $entry.Raw
-
-        # Default color
-        $color = "DarkGray"
-
-        if ($entry.Raw -ne "") {
-            try {
-                $age = (New-TimeSpan -Start $entry.Parsed -End (Get-Date)).Days
-
-                if ($age -lt 7) {
-                    $color = "Green"
-                }
-                elseif ($age -lt 30) {
-                    $color = "Yellow"
-                }
-                else {
-                    $color = "Red"
-                }
-            }
-            catch {
-                $color = "DarkGray"
-            }
-        }
-
-        switch ($entry.Key) {
-            "Backup" { Write-Host ("4) Backup -> Characters   (Last: {0})" -f $human) -ForegroundColor $color }
-            "Test"   { Write-Host ("5) Test -> Characters     (Last: {0})" -f $human) -ForegroundColor $color }
-            "Prod"   { Write-Host ("6) Prod -> Characters     (Last: {0})" -f $human) -ForegroundColor $color }
-        }
-    }
-
-    Write-Host "--------------------------------------------------------------"
-    Write-Host "8) Characters -> ALL (Backup, Test, Prod)"
-    Write-Host "--------------------------------------------------------------"
-    Write-Host "0) Exit"
-    Write-Host "--------------------------------------------------------------"
+    } while ($true)
 }
 
 # Main loop
 do {
-    Show-Menu
-    $choice = Read-Host "Select"
+    Write-Host "==============================="
+    Write-Host " Select SaveGame Type"
+    Write-Host "==============================="
+    Write-Host "1) Characters"
+    Write-Host "2) Worlds"
+    Write-Host "0) Exit"
+    Write-Host "==============================="
 
-    switch ($choice) {
-        "1" { Copy-FolderContent -Source $Characters -Target $Backup -StatusKey "Backup" }
-        "2" { Copy-FolderContent -Source $Characters -Target $Test   -StatusKey "Test" }
-        "3" { Copy-FolderContent -Source $Characters -Target $Prod   -StatusKey "Prod" }
+    $mainChoice = Read-Host "Select"
 
-        # Sorted restore actions
-        "4" { Copy-FolderContent -Source $Backup   -Target $Characters -StatusKey "Backup" }
-        "5" { Copy-FolderContent -Source $Test     -Target $Characters -StatusKey "Test" }
-        "6" { Copy-FolderContent -Source $Prod     -Target $Characters -StatusKey "Prod" }
+    switch ($mainChoice) {
 
-        # Copy to all three
-        "8" {
-            Copy-FolderContent -Source $Characters -Target $Backup -StatusKey "Backup"
-            Copy-FolderContent -Source $Characters -Target $Test   -StatusKey "Test"
-            Copy-FolderContent -Source $Characters -Target $Prod   -StatusKey "Prod"
+        "1" {
+            Manage-SaveType -Type "Characters" `
+                -Source $Characters `
+                -Backup $Backup `
+                -Test $Test `
+                -Prod $Prod
+        }
+
+        "2" {
+            Manage-SaveType -Type "Worlds" `
+                -Source $Worlds `
+                -Backup $WorldsBackup `
+                -Test $WorldsTest `
+                -Prod $WorldsProd
         }
 
         "0" { Write-Host "Exit." }
         default { Write-Host "Invalid input." }
     }
 
-} while ($choice -ne "0")
+} while ($mainChoice -ne "0")
