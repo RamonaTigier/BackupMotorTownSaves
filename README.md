@@ -62,10 +62,6 @@ Run the script in PowerShell:
 
 
 MotorTown SaveGame Manager 🚗💾
-https://img.shields.io/badge/Status-Active-brightgreen
-https://img.shields.io/badge/PowerShell-7%2B-blue
-https://img.shields.io/badge/License-MIT-yellow
-https://img.shields.io/badge/Version-1.4.0-orange
 
 Ein leistungsstarkes, farbcodiertes PowerShell‑Tool zur Verwaltung von MotorTown‑Savegames.
 Erstellt Backups, stellt Spielstände wieder her, sortiert nach Datum, warnt vor alten Backups
