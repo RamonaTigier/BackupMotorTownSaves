@@ -48,6 +48,14 @@ outdated backups, and supports multi‑target backup operations.
 
 └── Characters - Prod
 
+├── Worlds
+
+├── Worlds - Backup
+
+├── Worlds - Test
+
+└── Worlds - Prod
+
 
 All paths are generated dynamically using `$env:LOCALAPPDATA`.
 
@@ -100,6 +108,14 @@ Grau = kein Backup vorhanden
  ├── Characters - Test
  
  └── Characters - Prod
+
+ ├── Worlds
+
+ ├── Worlds - Backup
+
+ ├── Worlds - Test
+
+ └── Worlds - Prod
 Alle Pfade werden dynamisch über $env:LOCALAPPDATA erzeugt.
 
 🚀 Verwendung
