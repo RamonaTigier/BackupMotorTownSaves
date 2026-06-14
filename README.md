@@ -107,14 +107,3 @@ Starte das Skript einfach in PowerShell:
 ```powershell
 .\BackupMotorTownSaves.ps1
 ```
-
----
-
-Wenn du möchtest, kann ich dir zusätzlich:
-
-- eine **LICENSE** Datei generieren  
-- ein **CHANGELOG.md** erstellen  
-- ein **GitHub Release Template** bauen  
-- oder ein **Projekt‑Logo** designen  
-
-Sag einfach Bescheid.
