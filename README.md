@@ -36,6 +36,22 @@ outdated backups, and supports multi‑target backup operations.
 ---
 
 ## 📂 Folder Structure
+%LOCALAPPDATA%\MotorTown\Saved\SaveGames\
+├── Characters
+├── Characters - Backup
+├── Characters - Test
+└── Characters - Prod
+
+All paths are generated dynamically using `$env:LOCALAPPDATA`.
+
+---
+
+## 🚀 Usage
+
+Run the script in PowerShell:
+
+```powershell
+.\MotorTownSaveManager.ps1
 
 
 
