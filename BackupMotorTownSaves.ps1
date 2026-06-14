@@ -1,4 +1,4 @@
-# ============================
+﻿# ============================
 # MotorTown SaveGame Manager
 # ============================
 
@@ -56,7 +56,7 @@
 $Major = 1
 $Minor = 4
 $Patch = 0
-$Build = 13
+$Build = 14
 $Tag = "stable"
 
 # Compose version strings
@@ -65,10 +65,27 @@ $ReleaseTag  = "v$Major.$Minor.$Patch-$Tag"
 $Now = (Get-Date).ToString("dd.MM.yyyy HH:mm:ss")
 
 # Compact dynamic header
+# UTF-8 aktivieren
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Text.Encoding]::UTF8
+
+# Windows Codepage auf UTF-8 setzen
+chcp 65001 > $null
 $Header = @"
-MotorTown SaveGame Manager
+▓█████▄  ▄▄▄      ▄████▄   ██ ▄█▀ █    ██  ██▓███
+▒██▀ ██▌▒████▄   ▒██▀ ▀█   ██▄█▒  ██  ▓██▒▓██░  ██▒
+░██   █▌▒██  ▀█▄ ▒▓█    ▄ ▓███▄░ ▓██  ▒██░▓██░ ██▓▒
+░▓█▄   ▌░██▄▄▄▄██▒▓▓▄ ▄██▒▓██ █▄ ▓▓█  ░██░▒██▄█▓▒ ▒
+░▒████▓  ▓█   ▓██▒ ▓███▀ ░▒██▒ █▄▒▒█████▓ ▒██▒ ░  ░
+ ▒▒▓  ▒  ▒▒   ▓▒█░ ░▒ ▒  ░▒ ▒▒ ▓▒░▒▓▒ ▒ ▒ ▒▓▒░ ░  ░
+ ░ ▒  ▒   ▒   ▒▒ ░ ░  ▒   ░ ░▒ ▒░░░▒░ ░ ░ ░▒ ░
+ ░ ░  ░   ░   ▒  ░        ░ ░░ ░  ░░░ ░ ░ ░░
+   ░          ░  ░░ ░      ░  ░      ░
+ ░                  ░
+
+        B a c k u p M o t o r T o w n S a v e s
 Version: $ReleaseTag
-Build Time: $Now
+
 -----------------------------------------
 Backup/restore manager for MotorTown saves.
 Includes multi-backup, sorted restore list,
