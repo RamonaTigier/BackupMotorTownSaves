@@ -1,3 +1,4 @@
+![BackupMotorTownSaves](BackupMotorTownSaves.png)
 # BackupMotorTownSaves
 GERMAN version below.
 
