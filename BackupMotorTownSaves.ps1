@@ -22,11 +22,17 @@
    - Status file for tracking backup timestamps
    - Target folder cleanup before copying
    - File count display for source and target
+   - MotorTown version detection (SteamDB + manifest)
+   - Per-backup version tracking (Characters & Worlds)
 
  Version:
-   1.5.0
+   1.6.0
 
  Changelog:
+   1.6.0 - Added MotorTown version tracking (LastKnownVersion)
+           Added per-backup version storage
+           Improved version detection logic
+           Fixed status file initialization order
    1.5.0 - Added World-folder integration
    1.4.0 - Added color-coded backup age (green/yellow/red)
            Added correct date sorting (newest first)
@@ -53,17 +59,164 @@
 ===============================================================
 #>
 
+
 # Manual version definition
 $Major = 1
-$Minor = 5
-$Patch = 0
-$Build = 14
+$Minor = 6
+$Patch = 2
+$Build = 28
 $Tag = "stable"
 
 # Compose version strings
 $FullVersion = "$Major.$Minor.$Patch.$Build"
 $ReleaseTag  = "v$Major.$Minor.$Patch-$Tag"
 $Now = (Get-Date).ToString("dd.MM.yyyy HH:mm:ss")
+
+# Status file
+$StatusFile = ".\CharactersBackupStatus.txt"
+
+# Create status file if missing
+if (-not (Test-Path $StatusFile)) {
+    Set-Content $StatusFile "CharactersBackup="
+    Add-Content $StatusFile "CharactersBackupVersion="
+    Add-Content $StatusFile "CharactersTest="
+    Add-Content $StatusFile "CharactersTestVersion="
+    Add-Content $StatusFile "CharactersProd="
+    Add-Content $StatusFile "CharactersProdVersion="
+    Add-Content $StatusFile "WorldsBackup="
+    Add-Content $StatusFile "WorldsBackupVersion="
+    Add-Content $StatusFile "WorldsTest="
+    Add-Content $StatusFile "WorldsTestVersion="
+    Add-Content $StatusFile "WorldsProd="
+    Add-Content $StatusFile "WorldsProdVersion="
+    Add-Content $StatusFile "LastKnownVersion="
+}
+
+# ============================
+# Version Detection Functions
+# ============================
+
+# Steamapps-Ordner automatisch finden
+function Find-SteamAppsPath {
+    $possible = @(
+        "G:\Steam\steamapps",
+        "F:\Steam\steamapps",
+        "E:\Steam\steamapps",
+        "D:\Steam\steamapps",
+        "C:\Program Files (x86)\Steam\steamapps"
+    )
+
+    foreach ($path in $possible) {
+        if (Test-Path $path) {
+            return $path
+        }
+    }
+
+    return $null
+}
+
+# BuildID aus lokalem Manifest lesen
+function Get-LocalBuildID {
+    $steamApps = Find-SteamAppsPath
+    if (-not $steamApps) { return $null }
+
+    $manifest = Join-Path $steamApps "appmanifest_1369670.acf"
+    if (-not (Test-Path $manifest)) { return $null }
+
+    $content = Get-Content $manifest
+    foreach ($line in $content) {
+        if ($line -match '"buildid"\s+"(\d+)"') {
+            return $matches[1]
+        }
+    }
+
+    return $null
+}
+
+# Patch Title + BuildID von SteamDB holen
+function Get-SteamDBInfo {
+    try {
+        $url = "https://steamdb.info/app/1369670/patchnotes/"
+        $html = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 10
+
+        $patchTitle = ($html.Content -split "`n" | Select-String -Pattern "Patch Title").ToString()
+        $buildID    = ($html.Content -split "`n" | Select-String -Pattern "BuildID").ToString()
+
+        $patchTitle = ($patchTitle -replace ".*Patch Title:\s*", "").Trim()
+        $buildID    = ($buildID -replace ".*BuildID:\s*", "").Trim()
+
+        return [PSCustomObject]@{
+            PatchTitle = $patchTitle
+            BuildID    = $buildID
+        }
+    }
+    catch {
+        return $null
+    }
+}
+
+
+# Version bestimmen (automatisch + Fallback)
+function Resolve-MotorTownVersion {
+
+    # Statusdatei-Pfad (verwende globale Definition)
+    $statusFile = $StatusFile
+
+
+    # Letzte bekannte Version aus Statusdatei lesen
+    $lastKnownVersion = $null
+    if (Test-Path $statusFile) {
+        $content = Get-Content $statusFile
+        foreach ($line in $content) {
+            if ($line -match "^LastKnownVersion=(.+)$") {
+                $lastKnownVersion = $matches[1].Trim()
+            }
+        }
+    }
+
+    # Automatische Erkennung
+    $localBuild = Get-LocalBuildID
+    $steamInfo  = Get-SteamDBInfo
+
+    # Wenn BuildID übereinstimmt → Version aus SteamDB übernehmen
+    if ($localBuild -and $steamInfo -and $steamInfo.BuildID -eq $localBuild) {
+        $version = $steamInfo.PatchTitle
+
+        # LastKnownVersion aktualisieren
+        (Get-Content $statusFile) -replace "^LastKnownVersion=.*", "LastKnownVersion=$version" |
+            Set-Content $statusFile
+
+        return $version
+    }
+
+    # Wenn automatische Erkennung fehlschlägt → letzte bekannte Version verwenden
+    if ($lastKnownVersion) {
+        Write-Host ""
+        Write-Host "Using last known MotorTown version from status file: $lastKnownVersion"
+        return $lastKnownVersion
+    }
+
+    # Wenn nichts bekannt → Benutzer fragen
+    Write-Host ""
+    Write-Host "Could not determine MotorTown version automatically."
+    Write-Host "Local BuildID: $localBuild"
+    if ($steamInfo) { Write-Host "SteamDB BuildID: $($steamInfo.BuildID)" }
+    Write-Host ""
+
+    $manual = Read-Host "Please enter MotorTown version manually (e.g. 0.7.18+1)"
+
+    if ($manual) {
+        (Get-Content $statusFile) -replace "^LastKnownVersion=.*", "LastKnownVersion=$manual" |
+            Set-Content $statusFile
+    }
+
+    return $manual
+
+}
+
+$GameVersion = Resolve-MotorTownVersion
+$Global:MotorTownVersion = $GameVersion
+
 
 # Compact dynamic header
 # UTF-8 aktivieren
@@ -102,20 +255,6 @@ $Worlds       = Join-Path $BasePath "Worlds"
 $WorldsBackup = Join-Path $BasePath "Worlds - Backup"
 $WorldsTest   = Join-Path $BasePath "Worlds - Test"
 $WorldsProd   = Join-Path $BasePath "Worlds - Prod"
-
-
-# Status file
-$StatusFile = ".\CharactersBackupStatus.txt"
-
-# Create status file if missing
-if (-not (Test-Path $StatusFile)) {
-    Set-Content $StatusFile "CharactersBackup="
-    Add-Content $StatusFile "CharactersTest="
-    Add-Content $StatusFile "CharactersProd="
-    Add-Content $StatusFile "WorldsBackup="
-    Add-Content $StatusFile "WorldsTest="
-    Add-Content $StatusFile "WorldsProd="
-}
 
 # Read status
 function Get-Status {
@@ -197,6 +336,15 @@ function Copy-FolderContent {
         $oldDate = Get-Status -Key $StatusKey
         if ($oldDate -ne "") {
             Write-Host ("Last backup for {0}: {1}" -f $StatusKey, $oldDate)
+            $versionKey = "${StatusKey}Version"
+            $oldVersion = Get-Status $versionKey
+
+            if ($oldVersion -ne "") {
+                Write-Host ("Backup version: {0}" -f $oldVersion)
+            }
+            else {
+                Write-Host "Backup version: unknown"
+            }
         }
         else {
             Write-Host ("No previous backup for {0}." -f $StatusKey)
@@ -263,6 +411,9 @@ function Copy-FolderContent {
         if ($StatusKey -ne "") {
             $now = (Get-Date).ToString("yyyyMMdd HH:mm:ss")
             Set-Status -Key $StatusKey -Value $now
+            # Version zusätzlich speichern
+            $versionKey = "${StatusKey}Version"
+            Set-Status -Key $versionKey -Value $Global:MotorTownVersion
         }
 
         # Count target files AFTER copy
@@ -294,17 +445,25 @@ function Manage-SaveType {
         Write-Host "--------------------------------------------------------------"
         Write-Host "$Type SaveGame Manager"
         Write-Host "--------------------------------------------------------------"
-        Write-Host "1) $Type -> Backup"
-        Write-Host "2) $Type -> Test"
-        Write-Host "3) $Type -> Prod"
+        Write-Host "1) $Type -> Backup (Version: $GameVersion)"
+        Write-Host "2) $Type -> Test   (Version: $GameVersion)"
+        Write-Host "3) $Type -> Prod   (Version: $GameVersion)"
+
         Write-Host "--------------------------------------------------------------"
-        Write-Host "4) Backup -> $Type"
-        Write-Host "5) Test   -> $Type"
-        Write-Host "6) Prod   -> $Type"
+        $verBackup = Get-Status "${Type}BackupVersion"
+        $verTest   = Get-Status "${Type}TestVersion"
+        $verProd   = Get-Status "${Type}ProdVersion"
+
+        Write-Host "4) Backup -> $Type (Date: $(Get-Status "${Type}Backup") | Version: $verBackup)"
+        Write-Host "5) Test   -> $Type (Date: $(Get-Status "${Type}Test") | Version: $verTest)"
+        Write-Host "6) Prod   -> $Type (Date: $(Get-Status "${Type}Prod") | Version: $verProd)"
+
         Write-Host "--------------------------------------------------------------"
         Write-Host "8) $Type -> ALL (Backup, Test, Prod)"
+
         Write-Host "--------------------------------------------------------------"
         Write-Host "0) Back"
+
         Write-Host "--------------------------------------------------------------"
 
         $choice = Read-Host "Select"
