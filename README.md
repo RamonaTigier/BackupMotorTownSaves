@@ -7,7 +7,7 @@ GERMAN version below.
 ![Status](https://img.shields.io/badge/Status-Active-brightgreen)
 ![PowerShell](https://img.shields.io/badge/PowerShell-7%2B-blue)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
-![Version](https://img.shields.io/badge/Version-1.4.0-orange)
+![Version](https://img.shields.io/badge/Version-1.6.2-orange)
 
 A powerful, color‑coded PowerShell tool for managing MotorTown savegames.  
 It creates backups, restores savegame states, sorts them by date, warns about
