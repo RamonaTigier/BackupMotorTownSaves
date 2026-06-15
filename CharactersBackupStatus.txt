@@ -1,6 +1,0 @@
-CharactersBackup=20260614 17:00:18
-CharactersTest=20260614 17:00:21
-CharactersProd=20260614 17:00:22
-WorldBackup=
-WorldTest=
-WorldProd=
